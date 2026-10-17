@@ -46,6 +46,13 @@
                 </div>
                 @endif
 
+                @if(session('message'))
+                <div class="alert alert-{{ session('type') === 'success' ? 'success' : 'info' }} mb-4 rounded-xl shadow-sm">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('message') }}</span>
+                </div>
+                @endif
+
                 {{ $slot }}
 
             </div>
