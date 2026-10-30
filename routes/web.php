@@ -46,3 +46,5 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::resource('pasien', PasienController::class);
     Route::resource('obat', ObatController::class);
 });
+
+

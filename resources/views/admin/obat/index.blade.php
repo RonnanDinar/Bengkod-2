@@ -41,14 +41,14 @@
                             </td>
 
                             {{-- Kemasan --}}
-                            <td class="px-6 py-4 text-slate-600">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                    {{ $obat->kemasan }}
+                            <td class="px-6 py-4">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    {{ $obat->kemasan ?? '-' }}
                                 </span>
                             </td>
 
                             {{-- Harga --}}
-                            <td class="px-6 py-4 font-semibold text-slate-700">
+                            <td class="px-6 py-4 font-semibold text-slate-800">
                                 Rp {{ number_format($obat->harga, 0, ',', '.') }}
                             </td>
 
@@ -67,6 +67,7 @@
                                     <form action="{{ route('obat.destroy', $obat->id) }}" method="POST" class="inline">
                                         @csrf
                                         @method('DELETE')
+
                                         <button type="submit"
                                             onclick="return confirm('Yakin ingin menghapus obat ini?')"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold shadow-sm transition">

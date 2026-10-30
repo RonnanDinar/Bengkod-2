@@ -37,7 +37,7 @@
         @php
         $baseLink = "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200";
         $inactive = "text-slate-300 hover:bg-white/10 hover:text-white";
-        $active = "bg-gradient-to-r from-white/20 to-white/5 text-white font-semibold border border-indigo-400 border-2";
+        $active = "bg-gradient-to-r from-white/20 to-white/5 text-white font-semibold border-2 border-indigo-400 shadow-sm";
         @endphp
 
 
@@ -79,6 +79,8 @@
                 <i class="fas fa-pills w-4 text-center"></i>
                 Manajemen Obat
             </a>
+
+            
 
         </div>
         @endif

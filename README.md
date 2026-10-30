@@ -1,44 +1,39 @@
-# Dokumentasi Lengkap Aplikasi Poliklinik
+# Dokumentasi Pengerjaan Penugasan CRUD Poliklinik
 
-Aplikasi Sistem Informasi Poliklinik berbasis **Laravel 12**, dilengkapi dengan sistem **Multi-User Authentication** (*Admin, Dokter, Pasien*), manajemen basis data relasional Eloquent, validasi komprehensif, notifikasi flash message, dan antarmuka modern yang seragam menggunakan **Tailwind CSS & DaisyUI**.
+Dokumentasi ini merangkum perubahan dan penambahan fitur pada sistem aplikasi Poliklinik berbasis **Laravel 12**:
+1. **CRUD Manajemen Obat** untuk role **Admin** (Materi Bab 1)
+2. **CRUD Jadwal Periksa** untuk role **Dokter** (Materi Bab 3)
+3. **Navigasi Sidebar Dinamis** dengan pendeteksian rute aktif
 
 ---
 
 ## Daftar Isi
 1. [Akun Pengujian (Kredensial Default)](#1-akun-pengujian-kredensial-default)
-2. [Arsitektur Routing & Hak Akses](#2-arsitektur-routing--hak-akses)
-3. [Fitur CRUD Role Admin](#3-fitur-crud-role-admin)
-   - [A. Manajemen Poli](#a-manajemen-poli)
-   - [B. Manajemen Dokter](#b-manajemen-dokter)
-   - [C. Manajemen Pasien](#c-manajemen-pasien)
-   - [D. Manajemen Obat](#d-manajemen-obat)
-4. [Fitur CRUD Role Dokter](#4-fitur-crud-role-dokter)
-   - [Manajemen Jadwal Periksa](#manajemen-jadwal-periksa)
-5. [Sistem UI, Navigasi Sidebar, dan Notifikasi](#5-sistem-ui-navigasi-sidebar-dan-notifikasi)
-6. [Panduan Menjalankan Proyek](#6-panduan-menjalankan-proyek)
+2. [Arsitektur Perutean (routes/web.php)](#2-arsitektur-perutean-routeswebphp)
+3. [Fitur CRUD Obat (Role Admin - Bab 1)](#3-fitur-crud-obat-role-admin---bab-1)
+4. [Fitur CRUD Jadwal Periksa (Role Dokter - Bab 3)](#4-fitur-crud-jadwal-periksa-role-dokter---bab-3)
+5. [Navigasi Sidebar Dinamis (sidebar.blade.php)](#5-navigasi-sidebar-dinamis-sidebarbladephp)
+6. [Panduan Menjalankan Aplikasi](#6-panduan-menjalankan-aplikasi)
 
 ---
 
 ## 1. Akun Pengujian (Kredensial Default)
 
-Aplikasi telah dilengkapi seeder data pengguna untuk masing-masing hak akses:
+Untuk menguji fitur yang dibuat, gunakan kredensial berikut:
 
 | Role | Email | Password | URL Akses |
 |---|---|---|---|
-| **Admin** | `admin@gmail.com` | `admin` | `http://127.0.0.1:8000/admin/dashboard` |
-| **Dokter** | `dokter@gmail.com` | `dokter` | `http://127.0.0.1:8000/dokter/dashboard` |
-| **Pasien** | `pasien@gmail.com` | `pasien` | `http://127.0.0.1:8000/pasien/dashboard` |
+| **Admin** | `admin@gmail.com` | `admin` | `http://127.0.0.1:8000/admin/obat` |
+| **Dokter** | `dokter@gmail.com` | `dokter` | `http://127.0.0.1:8000/dokter/jadwal-periksa` |
 
 ---
 
-## 2. Arsitektur Routing & Hak Akses
+## 2. Arsitektur Perutean (`routes/web.php`)
 
-Routing diamankan menggunakan middleware `auth` dan `role:<role_name>` untuk memastikan pengguna hanya dapat mengakses fitur sesuai hak aksesnya:
+Perutean resource untuk modul **Obat** dan **Jadwal Periksa** didaftarkan di dalam grup middleware sesuai hak akses peran (*role-based access control*):
 
 ```php
-// routes/web.php
-
-// 1. Role Dokter
+// 1. Role Dokter - Resource Jadwal Periksa
 Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->group(function () {
     Route::get('/dashboard', function () {
         return view('dokter.dashboard');
@@ -46,14 +41,7 @@ Route::middleware(['auth', 'role:dokter'])->prefix('dokter')->group(function () 
     Route::resource('jadwal-periksa', JadwalPeriksaController::class);
 });
 
-// 2. Role Pasien
-Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('pasien.dashboard');
-    })->name('pasien.dashboard');
-});
-
-// 3. Role Admin
+// 2. Role Admin - Resource Obat
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -67,154 +55,67 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 ---
 
-## 3. Fitur CRUD Role Admin
+## 3. Fitur CRUD Obat (Role Admin - Bab 1)
 
-Seluruh modul CRUD admin didesain dengan standar antarmuka yang seragam (Header dengan tombol `+ Tambah`, Card putih bersih rounded-2xl border halus, input responsif 2 kolom, tombol Aksi Edit warna amber & Hapus warna merah dengan dialog konfirmasi).
+Modul ini memberikan akses penuh bagi Admin untuk mengelola data obat poliklinik.
 
-### A. Manajemen Poli
-* **URL:** `http://127.0.0.1:8000/admin/polis`
-* **Controller:** `App\Http\Controllers\Admin\AdminPoliController`
-* **File View:**
-  - `resources/views/admin/polis/index.blade.php` (Daftar Poli)
-  - `resources/views/admin/polis/create.blade.php` (Form Tambah Poli)
-  - `resources/views/admin/polis/edit.blade.php` (Form Edit Poli)
-* **Aturan Validasi Form:**
+### A. Berkas yang Dibuat & Dimodifikasi:
+* **Model:** [`app/Models/Obat.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/app/Models/Obat.php)
+* **Controller:** [`app/Http/Controllers/Admin/ObatController.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/app/Http/Controllers/Admin/ObatController.php)
+* **Route:** `Route::resource('obat', ObatController::class);` di `routes/web.php`
+* **Sidebar Menu:** Menu *"Manajemen Obat"* di [`sidebar.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/components/partials/sidebar.blade.php)
+* **Views:**
+  - [`resources/views/admin/obat/index.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/admin/obat/index.blade.php) (Tabel data obat)
+  - [`resources/views/admin/obat/create.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/admin/obat/create.blade.php) (Formulir tambah obat)
+  - [`resources/views/admin/obat/edit.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/admin/obat/edit.blade.php) (Formulir edit data obat)
+
+### B. Penjelasan Logika & Validasi Controller:
+* **`index()`**: Mengambil data seluruh obat (`Obat::all()`) dan mengirimkannya ke view daftar obat.
+* **`create()`**: Menampilkan formulir input penambahan obat baru.
+* **`store(Request $request)`**: Memvalidasi input lalu menyimpan obat baru:
   ```php
   $request->validate([
-      'nama_poli' => 'required|string|max:255',
-      'keterangan' => 'nullable|string',
+      'nama_obat' => 'required|string',
+      'kemasan' => 'required|string',
+      'harga' => 'required|integer',
   ]);
   ```
-* **Fitur & Alur Kerja:**
-  - **Tampil:** Menampilkan seluruh daftar poli klinik dan keterangannya.
-  - **Tambah:** Input nama poli dan keterangan poli.
-  - **Edit:** Memperbarui informasi nama poli dan keterangannya.
-  - **Hapus:** Menghapus poli dari sistem dengan konfirmasi popup.
-  - **Notifikasi:** Flash alert sukses muncul setelah operasi selesai.
+* **`edit(string $id)`**: Mengambil data obat berdasarkan ID (`Obat::findOrFail($id)`) dan menampilkan formulir ubah.
+* **`update(Request $request, string $id)`**: Memvalidasi perubahan dan memperbarui baris data obat terkait.
+* **`destroy(string $id)`**: Menghapus data obat terpilih dari basis data dengan konfirmasi aksi.
+
+### C. Screenshot Halaman Daftar Obat:
+Tangkapan layar halaman **Daftar Obat** menampilkan:
+- Tabel data obat lengkap (`NAMA OBAT`, `KEMASAN`, `HARGA`, `AKSI`)
+- Menu sidebar **"Manajemen Obat"** dalam keadaan **aktif** (highlight border & background gradient)
+- URL halaman browser: `http://127.0.0.1:8000/admin/obat`
+
+![Daftar Obat Admin](screenshoot/admin.png)
 
 ---
 
-### B. Manajemen Dokter
-* **URL:** `http://127.0.0.1:8000/admin/dokter`
-* **Controller:** `App\Http\Controllers\Admin\DokterController`
-* **File View:**
-  - `resources/views/admin/dokter/index.blade.php` (Daftar Dokter)
-  - `resources/views/admin/dokter/create.blade.php` (Form Tambah Dokter)
-  - `resources/views/admin/dokter/edit.blade.php` (Form Edit Dokter)
-* **Aturan Validasi Form:**
-  - **Tambah (Store):**
-    ```php
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'alamat' => 'required|string',
-        'no_ktp' => 'required|string|max:16|unique:users,no_ktp',
-        'no_hp' => 'required|string|max:15',
-        'id_poli' => 'required|string|exists:poli,id',
-        'email' => 'required|string|unique:users,email',
-        'password' => 'required|string|min:6',
-    ]);
-    ```
-  - **Ubah (Update):**
-    ```php
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'alamat' => 'required|string',
-        'no_ktp' => 'required|string|max:16|unique:users,no_ktp,' . $dokter->id,
-        'no_hp' => 'required|string|max:15',
-        'id_poli' => 'required|string|exists:poli,id',
-        'email' => 'required|string|unique:users,email,' . $dokter->id,
-        'password' => 'nullable|string|min:6', // Fleksibel jika tidak ingin mengganti password
-    ]);
-    ```
-* **Fitur & Alur Kerja:**
-  - **Tampil:** Menampilkan tabel berkolom `Nama Dokter`, `Email`, `No. KTP`, `No. HP`, `Alamat`, `Poli` *(pill badge biru muda)*, dan `Aksi`.
-  - **Tambah:** Form grid 2 kolom dengan dropdown data Poli dinamis, otomatis menyimpan ke model `User` dengan `role = 'dokter'` dan password ter-hash (`Hash::make`).
-  - **Edit:** Memperbarui profil dokter dengan opsi update password opsional.
-  - **Hapus:** Menghapus akun dokter dari basis data.
+## 4. Fitur CRUD Jadwal Periksa (Role Dokter - Bab 3)
 
----
+Modul ini memungkinkan dokter mengelola jadwal praktiknya secara mandiri.
 
-### C. Manajemen Pasien
-* **URL:** `http://127.0.0.1:8000/admin/pasien`
-* **Controller:** `App\Http\Controllers\Admin\PasienController`
-* **File View:**
-  - `resources/views/admin/pasien/index.blade.php` (Daftar Pasien)
-  - `resources/views/admin/pasien/create.blade.php` (Form Tambah Pasien)
-  - `resources/views/admin/pasien/edit.blade.php` (Form Edit Pasien)
-* **Aturan Validasi Form:**
-  - **Tambah (Store):**
-    ```php
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'alamat' => 'required|string',
-        'no_ktp' => 'required|string|max:16|unique:users,no_ktp',
-        'no_hp' => 'required|string|max:15',
-        'email' => 'required|string|email|unique:users,email',
-        'password' => 'required|string|min:6',
-    ]);
-    ```
-  - **Ubah (Update):**
-    ```php
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'alamat' => 'required|string',
-        'no_ktp' => 'required|string|max:16|unique:users,no_ktp,' . $pasien->id,
-        'no_hp' => 'required|string|max:15',
-        'email' => 'required|string|email|unique:users,email,' . $pasien->id,
-        'password' => 'nullable|string|min:6',
-    ]);
-    ```
-* **Fitur & Alur Kerja Khusus:**
-  - **Auto-Generate Nomor Rekam Medis (No. RM):**
-    Pada saat admin menambahkan pasien baru, sistem otomatis membuat Nomor Rekam Medis unik dengan format `YYYYMM-XXX` (contoh: `202610-001`):
-    ```php
-    $lastPasien = User::where('role', 'pasien')->orderBy('id', 'desc')->first();
-    $lastId = $lastPasien ? $lastPasien->id + 1 : 1;
-    $no_rm = date('Ym') . '-' . str_pad($lastId, 3, '0', STR_PAD_LEFT);
-    ```
-  - **Tampil:** Kolom `No. RM` disajikan dengan badge pill berwarna emerald.
-  - **Edit:** Menampilkan info No. RM eksisting secara readonly agar integritas rekam medis tetap terjaga.
+### A. Berkas yang Dibuat & Dimodifikasi:
+* **Model:** [`app/Models/JadwalPeriksa.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/app/Models/JadwalPeriksa.php)
+* **Controller:** [`app/Http/Controllers/Dokter/JadwalPeriksaController.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/app/Http/Controllers/Dokter/JadwalPeriksaController.php)
+* **Route:** `Route::resource('jadwal-periksa', JadwalPeriksaController::class);` di `routes/web.php`
+* **Sidebar Menu:** Menu *"Jadwal Periksa"* di [`sidebar.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/components/partials/sidebar.blade.php)
+* **Views:**
+  - [`resources/views/dokter/jadwal-periksa/index.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/dokter/jadwal-periksa/index.blade.php) (Tabel jadwal periksa)
+  - [`resources/views/dokter/jadwal-periksa/create.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/dokter/jadwal-periksa/create.blade.php) (Formulir tambah jadwal)
+  - [`resources/views/dokter/jadwal-periksa/edit.blade.php`](file:///c:/xampp3/htdocs/Bengkod%201/poliklinik-app-4/resources/views/dokter/jadwal-periksa/edit.blade.php) (Formulir edit jadwal)
 
----
-
-### D. Manajemen Obat
-* **URL:** `http://127.0.0.1:8000/admin/obat`
-* **Controller:** `App\Http\Controllers\Admin\ObatController`
-* **File View:**
-  - `resources/views/admin/obat/index.blade.php` (Daftar Obat)
-  - `resources/views/admin/obat/create.blade.php` (Form Tambah Obat)
-  - `resources/views/admin/obat/edit.blade.php` (Form Edit Obat)
-* **Aturan Validasi Form:**
-  ```php
-  $request->validate([
-      'nama_obat' => 'required|string|max:255',
-      'kemasan' => 'required|string|max:35',
-      'harga' => 'required|numeric|min:0',
-  ]);
-  ```
-* **Fitur & Alur Kerja:**
-  - **Tampil:** Tabel data obat dengan kolom `Nama Obat`, `Kemasan` *(badge rounded)*, `Harga` *(format nominal rupiah: `Rp 15.000`)*, dan `Aksi`.
-  - **Tambah:** Input nama obat, kemasan (contoh: *Strip @ 10 Tablet*, *Botol 60ml*), dan harga dalam angka.
-  - **Edit:** Form edit informasi obat.
-  - **Hapus:** Menghapus data obat dengan konfirmasi.
-
----
-
-## 4. Fitur CRUD Role Dokter
-
-### Manajemen Jadwal Periksa
-* **URL:** `http://127.0.0.1:8000/dokter/jadwal-periksa`
-* **Controller:** `App\Http\Controllers\Dokter\JadwalPeriksaController`
-* **File View:**
-  - `resources/views/dokter/jadwal-periksa/index.blade.php` (Daftar Jadwal Periksa)
-  - `resources/views/dokter/jadwal-periksa/create.blade.php` (Form Tambah Jadwal)
-  - `resources/views/dokter/jadwal-periksa/edit.blade.php` (Form Edit Jadwal)
-* **Keamanan Data (Scoping Dokter Login):**
-  Setiap dokter yang login hanya dapat melihat, menambah, mengubah, dan menghapus jadwal miliknya sendiri melalui scoping `where('id_dokter', Auth::id())`:
+### B. Penjelasan Logika & Keamanan Data (Scoping Dokter):
+* **Keamanan Data Milik Dokter Login (`Auth::id()`):**
+  Setiap dokter hanya dapat melihat, menambah, mengubah, dan menghapus jadwal miliknya sendiri:
   ```php
   $jadwals = JadwalPeriksa::where('id_dokter', Auth::id())->get();
   ```
-* **Aturan Validasi Form:**
+* **Validasi Waktu Praktik:**
+  Memastikan jam selesai selalu lebih akhir dari jam mulai:
   ```php
   $request->validate([
       'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
@@ -224,72 +125,58 @@ Seluruh modul CRUD admin didesain dengan standar antarmuka yang seragam (Header 
       'jam_selesai.after' => 'Jam selesai harus lebih akhir dari jam mulai.',
   ]);
   ```
-* **Fitur & Alur Kerja:**
-  - **Tampil:** Menampilkan hari praktik, jam mulai, jam selesai (format `H:i WIB`), status aktif (badge hijau), serta tombol edit & hapus.
-  - **Tambah:** Dropdown pilihan hari (`Senin` s/d `Minggu`) dan input waktu jam mulai & selesai. Dilengkapi validasi bahwa jam selesai harus sesudah jam mulai.
-  - **Edit:** Form edit jadwal periksa dengan data awal yang siap diubah.
-  - **Hapus:** Menghapus jadwal periksa dokter.
+
+### C. Screenshot Halaman Daftar Jadwal Periksa:
+Tangkapan layar halaman **Daftar Jadwal Periksa** menampilkan:
+- Tabel data jadwal (`HARI`, `JAM MULAI`, `JAM SELESAI`, `STATUS`, `AKSI`)
+- Menu sidebar **"Jadwal Periksa"** dalam keadaan **aktif** (highlight border & background gradient)
+- URL halaman browser: `http://127.0.0.1:8000/dokter/jadwal-periksa`
+
+![Daftar Jadwal Periksa Dokter](screenshoot/dokter.png)
 
 ---
 
-## 5. Sistem UI, Navigasi Sidebar, dan Notifikasi
+## 5. Navigasi Sidebar Dinamis (`sidebar.blade.php`)
 
-### A. Navigasi Sidebar Dinamis (`sidebar.blade.php`)
-Menu sidebar otomatis mendeteksi rute halaman yang sedang aktif menggunakan helper `request()->routeIs(...)` sehingga tautan aktif mendapatkan aksen gradient dan border yang jelas:
-* **Menu Admin:**
-  - Dashboard Admin: `request()->routeIs('admin.dashboard')`
-  - Manajemen Poli: `request()->routeIs('polis.*')`
-  - Manajemen Dokter: `request()->routeIs('dokter.*')`
-  - Manajemen Pasien: `request()->routeIs('pasien.*')`
-  - Manajemen Obat: `request()->routeIs('obat.*')`
-* **Menu Dokter:**
-  - Dashboard Dokter: `request()->routeIs('dokter.dashboard')`
-  - Jadwal Periksa: `request()->routeIs('jadwal-periksa.*')`
+Sidebar secara dinamis menandai menu aktif berdasarkan rute yang sedang diakses pengguna menggunakan helper Laravel `request()->routeIs(...)`:
 
-### B. Komponen Notifikasi Global (`app.blade.php`)
-Layout utama menangani flash alert secara universal baik dari session `success`, `error`, maupun `message` (`type = success / info`):
 ```blade
-@if(session('message'))
-<div class="alert alert-{{ session('type') === 'success' ? 'success' : 'info' }} mb-4 rounded-xl shadow-sm">
-    <i class="fas fa-check-circle"></i>
-    <span>{{ session('message') }}</span>
-</div>
-@endif
+{{-- Menu Admin: Manajemen Obat --}}
+<a href="{{ route('obat.index') }}"
+    class="{{ $baseLink }} {{ request()->routeIs('obat.*') ? $active : $inactive }}">
+    <i class="fas fa-pills w-4 text-center"></i>
+    Manajemen Obat
+</a>
+
+{{-- Menu Dokter: Jadwal Periksa --}}
+<a href="{{ route('jadwal-periksa.index') }}"
+    class="{{ $baseLink }} {{ request()->routeIs('jadwal-periksa.*') ? $active : $inactive }}">
+    <i class="fas fa-calendar-days w-4 text-center"></i>
+    Jadwal Periksa
+</a>
 ```
 
+Dengan pengecekan berbasis wildcard (`obat.*` dan `jadwal-periksa.*`), menu tetap berstatus aktif baik saat membuka halaman daftar (`index`), formulir tambah (`create`), maupun formulir edit (`edit`).
+
 ---
 
-## 6. Panduan Menjalankan Proyek
+## 6. Panduan Menjalankan Aplikasi
 
 1. **Pastikan Web Server & Database Aktif**:
-   Nyalakan Apache & MySQL pada XAMPP.
+   Nyalakan modul Apache dan MySQL pada aplikasi XAMPP.
 
-2. **Konfigurasi Environment (.env)**:
-   Pastikan pengaturan database pada berkas `.env` sudah sesuai:
-   ```ini
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=poliklinik_app
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-3. **Install Dependensi & Migrate**:
+2. **Migrasi Database & Seeder**:
    ```bash
-   composer install
-   npm install
    php artisan migrate --seed
    ```
 
-4. **Kompilasi Aset Frontend (Tailwind & DaisyUI)**:
+3. **Kompilasi Aset Frontend (Opsional)**:
    ```bash
    npm run build
    ```
-   *(Atau jalankan `npm run dev` untuk hot reload saat development)*
 
-5. **Jalankan Aplikasi**:
+4. **Jalankan Server Lokal**:
    ```bash
    php artisan serve
    ```
-   Buka di peramban: **`http://127.0.0.1:8000`** atau langsung ke halaman login di **`http://127.0.0.1:8000/login`**.
+   Akses aplikasi di browser pada: **`http://127.0.0.1:8000/login`**
