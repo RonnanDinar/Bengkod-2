@@ -37,7 +37,7 @@
         @php
         $baseLink = "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200";
         $inactive = "text-slate-300 hover:bg-white/10 hover:text-white";
-        $active = "bg-gradient-to-r from-white/20 to-white/5 text-white font-semibold border-2 border-indigo-400 shadow-sm";
+        $active = "bg-white/10 text-white font-semibold border border-indigo-400 shadow-sm";
         @endphp
 
 
@@ -98,10 +98,15 @@
 
             <a href="{{ route('pasien.dashboard') }}"
                 class="{{ $baseLink }} {{ request()->routeIs('pasien.dashboard') ? $active : $inactive }}">
-                <i class="fas fa-house-medical w-4 text-center"></i>
+                <i class="fas fa-house w-4 text-center"></i>
                 Dashboard Pasien
             </a>
 
+            <a href="{{ route('pasien.daftar') }}"
+                class="{{ $baseLink }} {{ request()->routeIs('pasien.daftar*') ? $active : $inactive }}">
+                <i class="fas fa-id-card w-4 text-center"></i>
+                Pendaftaran Periksa
+            </a>
 
         </div>
         @endif
@@ -126,6 +131,18 @@
                 class="{{ $baseLink }} {{ request()->routeIs('jadwal-periksa.*') ? $active : $inactive }}">
                 <i class="fas fa-calendar-days w-4 text-center"></i>
                 Jadwal Periksa
+            </a>
+
+            <a href="{{ route('periksa-pasien.index') }}"
+                class="{{ $baseLink }} {{ request()->routeIs('periksa-pasien.*') ? $active : $inactive }}">
+                <i class="fas fa-notes-medical w-4 text-center"></i>
+                Periksa Pasien
+            </a>
+
+            <a href="{{ route('riwayat-pasien.index') }}"
+                class="{{ $baseLink }} {{ request()->routeIs('riwayat-pasien.*') ? $active : $inactive }}">
+                <i class="fas fa-clock-rotate-left w-4 text-center"></i>
+                Riwayat Pasien
             </a>
 
         </div>
